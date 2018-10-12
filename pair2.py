@@ -5,9 +5,10 @@
 from datetime import timedelta
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import make_scorer
+from sklearn.metrics import make_scorer, confusion_matrix, classification_report
 from sklearn.model_selection import PredefinedSplit, GridSearchCV
 from sklearn.pipeline import Pipeline
+from sklearn.ensamble import RandomForestClassifier
 import numpy as np
 import pandas as pd
 
@@ -111,18 +112,21 @@ if __name__ == '__main__':
         ('compute_age', ComputeAge()),
         ('nearest_average', ComputeNearestMean()),
         ('columns', ColumnFilter()),
-        ('lm', LinearRegression())
+        ('rf', RandomForestClassifier())
     ])
     df = df.reset_index()
 
     # GridSearch
-    params = {'nearest_average__window': [3, 5, 7]}
+    params = {'n_estimators': [100, 200, 500],
+             'max_depth': [3, 5, 7],
+             'max_features': ['auto', 'sqrt', 'log2']}
 
     # Turns our rmsle func into a scorer of the type required
     # by gridsearchcv.
     rmsle_scorer = make_scorer(rmsle, greater_is_better=False)
 
     gscv = GridSearchCV(p, params,
+                        n_jobs=-1,
                         scoring=rmsle_scorer,
                         cv=cross_val)
     clf = gscv.fit(df.reset_index(), y, n_jobs=-1)
