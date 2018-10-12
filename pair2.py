@@ -8,10 +8,10 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import make_scorer, confusion_matrix, classification_report
 from sklearn.model_selection import PredefinedSplit, GridSearchCV
 from sklearn.pipeline import Pipeline
-from sklearn.ensamble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 import pandas as pd
-
+from data_cleaning import DataCleaning
 
 class DataType(BaseEstimator, TransformerMixin):
     """Cast the data types of the id and data source columns to strings
@@ -85,51 +85,46 @@ class ColumnFilter(BaseEstimator, TransformerMixin):
         pass
 
 
-def rmsle(y_hat, y):
+def accuracy(y_hat, y):
     """Calculate the root mean squared log error between y
     predictions and true ys.
     """
-    pass
+    return np.mean(y_hat == y)
 
 
 if __name__ == '__main__':
     df = pd.read_csv('data/churn_train.csv')
+    # creating dependent churn variables
+    # labelled customers churned if they hadn't used the service in the last
+    # month
+
+    condition = df['last_trip_date'] < '2014-06-01' 
+    df['churn'] = 1
+    df.ix[~condition, 'churn'] = 0
+    y = df['churn']
     
-    df = df.set_index('SalesID').sort_index()
-    y = df.SalePrice
-
-    # This is for predefined split... we want -1 for our training split,
-    # 0 for the test split.
-    cv_cutoff_date = pd.to_datetime('2011-01-01')
-    cv = -1*(pd.to_datetime(df.saledate) < cv_cutoff_date).astype(int)
-
-    cross_val = PredefinedSplit(cv)
-
     p = Pipeline([
-        ('filter', FilterColumns()),
-        ('type_change', DataType()),
-        ('replace_outliers', ReplaceOutliers()),
-        ('compute_age', ComputeAge()),
-        ('nearest_average', ComputeNearestMean()),
-        ('columns', ColumnFilter()),
+        ('dc', DataCleaning()),
         ('rf', RandomForestClassifier())
     ])
-    df = df.reset_index()
-
+    '''
     # GridSearch
     params = {'n_estimators': [100, 200, 500],
              'max_depth': [3, 5, 7],
              'max_features': ['auto', 'sqrt', 'log2']}
+    '''
+    params = {'n_estimators': [100, 200, 500]}
 
     # Turns our rmsle func into a scorer of the type required
     # by gridsearchcv.
-    rmsle_scorer = make_scorer(rmsle, greater_is_better=False)
+    acc_scorer = make_scorer(accuracy)
 
     gscv = GridSearchCV(p, params,
                         n_jobs=-1,
-                        scoring=rmsle_scorer,
-                        cv=cross_val)
-    clf = gscv.fit(df.reset_index(), y, n_jobs=-1)
+                        scoring=acc_scorer,
+                        cv=10)
+    
+    clf = gscv.fit(df, y, n_jobs=-1)
 
     print('Best parameters: {}'.format(clf.best_params_))
     print('Best RMSLE: {}'.format(clf.best_score_))
