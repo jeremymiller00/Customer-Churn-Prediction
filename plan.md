@@ -2,20 +2,31 @@
 business questions:
 predict yes/no rides in the last 30 days
 understand why
+Android app needs development
 
 data:
 build model
 find features wtih strongest predictive power
-define actionable steps
+define actionable steps for retaining customers
+
 
 features to engineer:
-we need column ride in last 30 day
-1 = no trip in the last 30 days
+X we need column ride in last 30 day
 user lifetime
 trips per month
 dollars per month
 
+
+*** define metrics ***
+
+roc curve!
+
 learned from eda:
+all signups in one month jan 2014
+signups peak on weekends
+churn corelated with city, device, lux, 
+num of trips in first thirty days
+rating by rider
 
 
 
