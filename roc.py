@@ -38,4 +38,5 @@ def plot_roc(fprs, tprs, thresholds):
     plt.plot([0,1],[0,1], 'k:')
     plt.title("ROC Curve")
     plt.xlabel("FPR")
-    plt.ylabel("TPR");
+    plt.ylabel("TPR")
+    plt.show()
