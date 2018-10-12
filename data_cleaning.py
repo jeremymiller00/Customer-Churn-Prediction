@@ -2,6 +2,17 @@ import pandas as pd
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 
+
+def accuracy(y_hat, y):
+    """Calculate the accuracy score
+    """
+    return np.mean(y_hat == y)
+
+def recall(y_hat, y):
+    ''' Calculate recall score'''
+    return np.mean()
+    pass
+
 '''
 This script has functions to clean the test and train data
 as well as engineer new features, for use in the plots and churn_model

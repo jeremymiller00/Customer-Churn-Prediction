@@ -11,19 +11,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 import numpy as np
 import pandas as pd
-from data_cleaning import DataCleaning
+from data_cleaning import DataCleaning, accuracy, recall
 from sklearn.model_selection import train_test_split
-
-
-def accuracy(y_hat, y):
-    """Calculate the accuracy score
-    """
-    return np.mean(y_hat == y)
-
-def recall(y_hat, y):
-    ''' Calculate recall score'''  
-    return np.mean()
-    pass
 
 if __name__ == '__main__':
     df = pd.read_csv('data/churn_train.csv')
@@ -56,7 +45,7 @@ if __name__ == '__main__':
     
     }
 
-    log_params = { 'C' : [1, 2, 3, 4, 5]
+    lr_params = { 'C' : [1, 2, 3, 4, 5]
                 
     }
 
@@ -71,19 +60,19 @@ if __name__ == '__main__':
     #                     n_jobs=-1,
     #                     scoring=acc_scorer,
     #                     cv=10)
-
+    '''
     gscv = GridSearchCV(estimator=gb,
                     param_grid=gb_params,
                     n_jobs=-1,
                     scoring=acc_scorer,
                     cv=10)
-    
+    '''    
     gscv = GridSearchCV(estimator=lr,
                 param_grid=lr_params,
                 n_jobs=-1,
                 scoring=acc_scorer,
                 cv=10)
-
+    
     clf = gscv.fit(df, y)
     
     model = clf.best_estimator_
