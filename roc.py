@@ -1,3 +1,6 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
 def calc_for_roc(y_test, thresholds):
     '''
     thresholds come from predict_proba
