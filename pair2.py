@@ -113,18 +113,19 @@ if __name__ == '__main__':
              'max_depth': [3, 5, 7],
              'max_features': ['auto', 'sqrt', 'log2']}
     '''
-    params = {'n_estimators': [100, 200, 500]}
+    params = {'rf__n_estimators': [100, 200, 500]}
 
     # Turns our rmsle func into a scorer of the type required
     # by gridsearchcv.
     acc_scorer = make_scorer(accuracy)
 
-    gscv = GridSearchCV(p, params,
+    gscv = GridSearchCV(estimator=p,
+                        param_grid=params,
                         n_jobs=-1,
                         scoring=acc_scorer,
                         cv=10)
     
-    clf = gscv.fit(df, y, n_jobs=-1)
+    clf = gscv.fit(df, y)
 
     print('Best parameters: {}'.format(clf.best_params_))
     print('Best RMSLE: {}'.format(clf.best_score_))
