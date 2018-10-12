@@ -4,86 +4,15 @@
 """
 from datetime import timedelta
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import make_scorer, confusion_matrix, classification_report
 from sklearn.model_selection import PredefinedSplit, GridSearchCV
 from sklearn.pipeline import Pipeline
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 import numpy as np
 import pandas as pd
 from data_cleaning import DataCleaning
 from sklearn.model_selection import train_test_split
-
-class DataType(BaseEstimator, TransformerMixin):
-    """Cast the data types of the id and data source columns to strings
-    from numerics.
-    """
-    col_types = {'str': ['MachineID', 'ModelID', 'datasource']}
-
-    def fit(self, X, y):
-        pass
-
-    def transform(self, X):
-        pass
-
-
-class FilterColumns(BaseEstimator, TransformerMixin):
-    """Only keep columns that don't have NaNs.
-    """
-    def fit(self, X, y):
-        pass
-
-    def transform(self, X):
-        pass
-
-
-class ReplaceOutliers(BaseEstimator, TransformerMixin):
-    """Replace year made when listed as earlier than 1900, with
-    mode of years after 1900. Also add imputation indicator column.
-    """
-    def fit(self, X, y):
-        pass
-
-    def transform(self, X):
-        pass
-
-
-class ComputeAge(BaseEstimator, TransformerMixin):
-    """Compute the age of the vehicle at sale.
-    """
-    def fit(self, X, y):
-        pass
-
-    def transform(self, X):
-        pass
-
-
-class ComputeNearestMean(BaseEstimator, TransformerMixin):
-    """Compute a mean price for similar vehicles.
-    """
-    def __init__(self, window=5):
-        self.window = window
-
-    def get_params(self, **kwargs):
-        pass
-
-    def fit(self, X, y):
-        pass
-
-    def transform(self, X):
-        pass
-
-
-class ColumnFilter(BaseEstimator, TransformerMixin):
-    """Only use the following columns.
-    """
-
-    def fit(self, X, y):
-        # Get the order of the index for y.
-        pass
-
-    def transform(self, X):
-        pass
 
 
 def accuracy(y_hat, y):
@@ -94,6 +23,7 @@ def accuracy(y_hat, y):
 def recall(y_hat, y):
     ''' Calculate recall score'''  
     return np.mean()
+    pass
 
 if __name__ == '__main__':
     df = pd.read_csv('data/churn_train.csv')
@@ -118,17 +48,42 @@ if __name__ == '__main__':
              'max_depth': [3, 5, 7],
              'max_features': ['auto', 'sqrt', 'log2']}
 
-    rf = RandomForestClassifier()
+    gb_params = {'learning_rate': [0.01, 0.1, 1, 10],
+                'n_estimators' : [50, 100, 500],
+                'subsample' : [0.3, 0.7, 1],
+                'max_depth' : [2, 3, 5, 7],
+                'max_features' : ['auto', 'sqrt', 'log2']
     
+    }
+
+    log_params = { 'C' : [1, 2, 3, 4, 5]
+                
+    }
+
+    rf = RandomForestClassifier()
+    gb = GradientBoostingClassifier()
+    lr = LogisticRegression()
 
     acc_scorer = make_scorer(accuracy)
 
-    gscv = GridSearchCV(estimator=rf,
-                        param_grid=params,
-                        n_jobs=-1,
-                        scoring=acc_scorer,
-                        cv=10)
+    # gscv = GridSearchCV(estimator=rf,
+    #                     param_grid=params,
+    #                     n_jobs=-1,
+    #                     scoring=acc_scorer,
+    #                     cv=10)
+
+    gscv = GridSearchCV(estimator=gb,
+                    param_grid=gb_params,
+                    n_jobs=-1,
+                    scoring=acc_scorer,
+                    cv=10)
     
+    gscv = GridSearchCV(estimator=lr,
+                param_grid=lr_params,
+                n_jobs=-1,
+                scoring=acc_scorer,
+                cv=10)
+
     clf = gscv.fit(df, y)
     
     model = clf.best_estimator_
@@ -140,6 +95,7 @@ if __name__ == '__main__':
     predictions = model.predict(X_test)
 
     print(classification_report(y_test, predictions))
+    print(confusion_matrix(y_test, predictions))
     
     '''
     print('Best parameters: {}'.format(clf.best_params_))
