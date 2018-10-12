@@ -8,10 +8,11 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import make_scorer, confusion_matrix, classification_report
 from sklearn.model_selection import PredefinedSplit, GridSearchCV
 from sklearn.pipeline import Pipeline
-from sklearn.ensamble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 import pandas as pd
-
+from data_cleaning import DataCleaning
+from sklearn.model_selection import train_test_split
 
 class DataType(BaseEstimator, TransformerMixin):
     """Cast the data types of the id and data source columns to strings
@@ -85,52 +86,62 @@ class ColumnFilter(BaseEstimator, TransformerMixin):
         pass
 
 
-def rmsle(y_hat, y):
-    """Calculate the root mean squared log error between y
-    predictions and true ys.
+def accuracy(y_hat, y):
+    """Calculate the accuracy score
     """
-    pass
+    return np.mean(y_hat == y)
 
+def recall(y_hat, y):
+    ''' Calculate recall score'''  
+    return np.mean()
 
 if __name__ == '__main__':
     df = pd.read_csv('data/churn_train.csv')
+    # creating dependent churn variables
+    # labelled customers churned if they hadn't used the service in the last
+    # month
+
+    condition = df['last_trip_date'] < '2014-06-01' 
+    df['churn'] = 1
+    df.loc[~condition, 'churn'] = 0
+    y = df['churn']
+    clean = DataCleaning()
+    df = clean.transform(df)
     
-    df = df.set_index('SalesID').sort_index()
-    y = df.SalePrice
-
-    # This is for predefined split... we want -1 for our training split,
-    # 0 for the test split.
-    cv_cutoff_date = pd.to_datetime('2011-01-01')
-    cv = -1*(pd.to_datetime(df.saledate) < cv_cutoff_date).astype(int)
-
-    cross_val = PredefinedSplit(cv)
-
-    p = Pipeline([
-        ('filter', FilterColumns()),
-        ('type_change', DataType()),
-        ('replace_outliers', ReplaceOutliers()),
-        ('compute_age', ComputeAge()),
-        ('nearest_average', ComputeNearestMean()),
-        ('columns', ColumnFilter()),
-        ('rf', RandomForestClassifier())
-    ])
-    df = df.reset_index()
-
-    # GridSearch
+    #p = Pipeline([
+    #    ('dc', DataCleaning()),
+    #    ('rf', RandomForestClassifier())
+    #])
+    
+    # GridSearch for RF
     params = {'n_estimators': [100, 200, 500],
              'max_depth': [3, 5, 7],
              'max_features': ['auto', 'sqrt', 'log2']}
 
-    # Turns our rmsle func into a scorer of the type required
-    # by gridsearchcv.
-    rmsle_scorer = make_scorer(rmsle, greater_is_better=False)
+    rf = RandomForestClassifier()
+    
 
-    gscv = GridSearchCV(p, params,
+    acc_scorer = make_scorer(accuracy)
+
+    gscv = GridSearchCV(estimator=rf,
+                        param_grid=params,
                         n_jobs=-1,
-                        scoring=rmsle_scorer,
-                        cv=cross_val)
-    clf = gscv.fit(df.reset_index(), y, n_jobs=-1)
+                        scoring=acc_scorer,
+                        cv=10)
+    
+    clf = gscv.fit(df, y)
+    
+    model = clf.best_estimator_
+    
+    X_train, X_test, y_train, y_test = train_test_split(df, y, test_size=0.33, random_state=66)
+    
+    model.fit(X_train, y_train)
+    
+    predictions = model.predict(X_test)
 
+    print(classification_report(y_test, predictions))
+    
+    '''
     print('Best parameters: {}'.format(clf.best_params_))
     print('Best RMSLE: {}'.format(clf.best_score_))
 
@@ -141,3 +152,4 @@ if __name__ == '__main__':
     test['SalePrice'] = test_predictions
     outfile = 'data/solution_benchmark.csv'
     test[['SalesID', 'SalePrice']].to_csv(outfile, index=False)
+    '''
