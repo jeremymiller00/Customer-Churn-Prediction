@@ -48,10 +48,10 @@ if __name__ == '__main__':
              'max_depth': [3, 5, 7],
              'max_features': ['auto', 'sqrt', 'log2']}
 
-    gb_params = {'learning_rate': [0.01, 0.1, 1, 10],
-                'n_estimators' : [50, 100, 500],
-                'subsample' : [0.3, 0.7, 1],
-                'max_depth' : [2, 3, 5, 7],
+    gb_params = {'learning_rate': [0.01, 0.1, 1],
+                'n_estimators' : [50, 100],
+                'subsample' : [0.5, 1],
+                'max_depth' : [3, 5],
                 'max_features' : ['auto', 'sqrt', 'log2']
     
     }
