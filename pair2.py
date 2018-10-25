@@ -60,18 +60,18 @@ if __name__ == '__main__':
     #                     n_jobs=-1,
     #                     scoring=acc_scorer,
     #                     cv=10)
-    '''
+    
     gscv = GridSearchCV(estimator=gb,
                     param_grid=gb_params,
                     n_jobs=-1,
                     scoring=acc_scorer,
-                    cv=10)
-    '''    
-    gscv = GridSearchCV(estimator=lr,
-                param_grid=lr_params,
-                n_jobs=-1,
-                scoring=acc_scorer,
-                cv=10)
+                    cv=10)    
+    
+#     gscv = GridSearchCV(estimator=lr,
+#                 param_grid=lr_params,
+#                 n_jobs=-1,
+#                 scoring=acc_scorer,
+#                 cv=10)
     
     clf = gscv.fit(df, y)
     
