@@ -1,9 +1,7 @@
-""" This solution makes heavy use of sklearn's Pipeline class.
+""" This solution makes use of sklearn's Pipeline class.
     You can find documentation on using this class here:
     http://scikit-learn.org/stable/modules/pipeline.html
 """
-import numpy as np
-import pandas as pd
 from datetime import timedelta
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.linear_model import LogisticRegression
@@ -11,11 +9,10 @@ from sklearn.metrics import make_scorer, confusion_matrix, classification_report
 from sklearn.model_selection import PredefinedSplit, GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from sklearn.model_selection import train_test_split
-
+import numpy as np
+import pandas as pd
 from data_cleaning import DataCleaning, accuracy, recall
-from feature_engineer import feature_engineer
-
+from sklearn.model_selection import train_test_split
 
 if __name__ == '__main__':
     df = pd.read_csv('data/churn_train.csv')
@@ -55,32 +52,27 @@ if __name__ == '__main__':
     rf = RandomForestClassifier()
     gb = GradientBoostingClassifier()
     lr = LogisticRegression()
-    acc_scorer = make_scorer(accuracy) # recall would be more appropriate here
 
-    # choose parameter grid based on desired model
-    # Gradient Boosted trees had slightly better performance
+    acc_scorer = make_scorer(accuracy)
 
-    '''
-    gscv = GridSearchCV(estimator=rf,
-                        param_grid=params,
-                        n_jobs=-1,
-                        scoring=acc_scorer,
-                        cv=10)
-    '''
-
+    # gscv = GridSearchCV(estimator=rf,
+    #                     param_grid=params,
+    #                     n_jobs=-1,
+    #                     scoring=acc_scorer,
+    #                     cv=10)
+    
     gscv = GridSearchCV(estimator=gb,
                     param_grid=gb_params,
                     n_jobs=-1,
                     scoring=acc_scorer,
-                    cv=10)
-    '''    
-    gscv = GridSearchCV(estimator=lr,
-                param_grid=lr_params,
-                n_jobs=-1,
-                scoring=acc_scorer,
-                cv=10)
-    '''
-
+                    cv=10)    
+    
+#     gscv = GridSearchCV(estimator=lr,
+#                 param_grid=lr_params,
+#                 n_jobs=-1,
+#                 scoring=acc_scorer,
+#                 cv=10)
+    
     clf = gscv.fit(df, y)
     
     model = clf.best_estimator_
